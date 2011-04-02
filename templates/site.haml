@@ -1,0 +1,20 @@
+!!! Strict
+%html
+    %head
+        %title hashmarkd.com \| share bookmarks with the Twitterverse
+        %script(src=view.at_anywhere_url, type="text/javascript")
+        %link(href="/styles/main.css", rel="stylesheet", type="text/css")
+    %body
+        #header
+            %h1#logo
+                %a(href="http://hashmarkd.com") hashmarkd.com
+            %ul#meta-nav
+                %li#login
+                    %a(href="#") Connect with Twitter (coming soon!)
+            %ul#main-nav
+                %li
+                    %a(href="/markd/#by_me") \#markd by me
+                %li
+                    %a(href="/markd/#for_me") \#markd for me
+        .content ${self.body()}
+

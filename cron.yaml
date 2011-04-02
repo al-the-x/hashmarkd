@@ -1,0 +1,5 @@
+cron:
+-   description: fetch new Tweets via Search API
+    url: /tasks/fetch/
+    schedule: every 2 mins
+
