@@ -1,27 +1,28 @@
 from google.appengine.ext import db
 from base import RequestHandler
 from models import Tweet, User
-import functools, tweepy, yaml
+import decorator, tweepy, yaml
 
-def login_optional ( f ):
-    @functools.wraps(f)
-    def get_user ( self, *args, **kwargs ):
-        user = User.for_screen_name(self.request.get('screen_name', None))
+@decorator.decorator
+def add_user_to_request ( f, self, *args, **kwargs ):
+    '''
+    Pull the "screen_name" parameter and display Tweets for that User,
+    if we have any. This is all public data anyway, so we're not concerned
+    about authentication yet.
+    '''
 
-        return f(self, user, *args, **kwargs)
-    return get_user
+    self.request.user = User.for_screen_name(
+        self.request.get('screen_name', None)
+    )
+
+    return f(self, *args, **kwargs)
 
 
 class IndexPage ( RequestHandler ):
+    @add_user_to_request
     def get ( self ):
-        self.view.recents = [ ]
+        user = self.request.user
 
-        self.render_to_response('index.haml')
-
-
-class MarkdPage ( RequestHandler ):
-    @login_optional
-    def get ( self, user ):
         self.view.user = user
 
         self.view.by_me = Tweet.all_from(
@@ -32,7 +33,7 @@ class MarkdPage ( RequestHandler ):
             user.id if user else None
         ).fetch(limit = 5)
 
-        self.render_to_response('markd.haml')
+        self.render_to_response('index.haml')
 
 
 class FetchTask ( RequestHandler ):
@@ -47,19 +48,20 @@ class FetchTask ( RequestHandler ):
         )
 
         for result in tweepy.api.search('#markd', filter = 'links', since = since):
+            ## TODO: Refactor into class method of Tweet
             t = Tweet.get_or_insert(result.id_str, status_id = result.id_str,
                 from_user = User.for_screen_name(result.from_user),
                 to_user = User.for_user_id(result.to_user_id),
                 created_at = result.created_at, text = result.text
             )
 
+            ## Just some sanity checks to let me know you're workin', buddy...
             self.response.out.write('.' if t else 'X')
 
-        else: self.response.out.write('Done.')
+        self.response.out.write('Done.')
 
 
 URLS = [
     (r'/', IndexPage),
-    (r'/markd/', MarkdPage),
     (r'/tasks/fetch/', FetchTask),
 ]
