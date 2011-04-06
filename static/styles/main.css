@@ -1,4 +1,66 @@
 /**
  * @author David Rogers <david@ethos-development.com>
  */
-/* I'll get to this eventually... */
+body, td
+{
+    font-family: Arial Neue, Arial, sans-serif;
+    font-size: 14pt;
+}
+
+h1, h2, h3, h4, h5, h6 { }
+h1 { font-size: 36pt; }
+h2 { font-size: 24pt; }
+h3 { font-size: 18pt; }
+h4 { }
+h5 { }
+h6 { }
+
+.clear { clear: both; }
+
+#content
+{
+    position: relative;
+    background: #EEE;
+    margin: 0 auto;
+    padding: 1ex 1em;
+    width: 90%;
+}
+
+#meta-nav
+{
+    list-style-type: none;
+    position: absolute;
+    right: 0; top: 0;
+    padding: 1ex 1em;
+}
+
+#main-nav { margin: 1ex .5em; }
+#main-nav li
+{
+    display: inline;
+}
+#main-nav a
+{
+    padding: .5ex 1.5em;
+    background: #CCC;
+}
+
+ul.panels > li { display: block; }
+ul.panels li.panel
+{
+    margin: 2px; padding: 1ex 1em;
+    width: 45%;
+    float: left;
+}
+
+li.panel li { }
+
+.column
+{
+    float: left;
+}
+
+.column#column-left
+{
+    width: 50%; min-width: 450px;
+}
