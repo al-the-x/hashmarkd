@@ -65,7 +65,7 @@ class Base(object):
 
 
 class GreedyBase(Base):
-
+    
     def __init__(self, *args, **kwargs):
         super(GreedyBase, self).__init__(*args, **kwargs)
         self._greedy_parent = None
@@ -123,6 +123,10 @@ class Content(Base):
         return '%s(%r)' % (self.__class__.__name__, self.content)
 
 
+
+class GreedyContent(Content, GreedyBase):
+    pass
+
 class Expression(Content, GreedyBase):
 
     def __init__(self, content, filters=''):
@@ -139,7 +143,6 @@ class Expression(Content, GreedyBase):
 
     def __repr__(self):
         return '%s(%r, %r)' % (self.__class__.__name__, self.content, self.filters)
-
 
 
 
