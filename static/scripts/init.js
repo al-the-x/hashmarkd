@@ -3,11 +3,33 @@ window.google && google.load('jquery'); // TODO: Figure out why Google API Loade
 (function($){ // closure
     $(function(){
         twttr.anywhere(function(T){
-            // T('#auth').connectButton(); // Skpped for now...
-            T('.screen_name').hovercards();
+            T('.screen_name, .tweet').hovercards();
         }); // END twttr.anywhere
 
-        //$('ul.panels').panels(); // Not used for now... Need better animation.
+        /**
+         * Compile the reusable "pattern" first, which matches raw links that haven't
+         * been rendered as an anchor tag yet.
+         */
+        var pattern = /(?!<a href=")http:\S+/g;
+
+        /**
+         * Replace instances of textual links within a ".tweet" with _actual_ links
+         * that you can click on, ignoring the links that may already be "hovercards()".
+         */
+        $('.tweet').html(function(index, html){
+            return html.replace(pattern, '<a href="$&" rel="external">$&</a>');
+        }); // END linkify link-like text in tweets
+
+
+        /**
+         * Links with "rel=external" refer to documents off-site and should open
+         * in a new window / tab / whatever by default.
+         */
+        $('a[href][rel=external]').click(function(){
+            window.open(this.href);
+
+            return false;
+        }); // END click external links
 
         /**
          * This adds some magic to any <input> element that has a "title" attribute
@@ -31,14 +53,14 @@ window.google && google.load('jquery'); // TODO: Figure out why Google API Loade
         }); // END each empty input with a title
 
         /**
-         * This adds some magic to links that only have a hash (href="#") and
+         * This adds some magic to links that only have a hash (href="#something") and
          * a "rel" attribute. When clicked, they'll "trigger()" the event named
-         * by their "rel" on the element with id matching their hash.
+         * by their "rel" on the element with id matching the hash.
          */
         $('a[href^=#][rel]').click(function(){
-            var $this = $(this);
+            var $el = $(this);
 
-            $($this.attr('href')).trigger($this.attr('rel'));
+            $($el.attr('href')).trigger($el.attr('rel'));
 
             return false;
         }); // END clicky magic
