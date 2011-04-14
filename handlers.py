@@ -1,7 +1,7 @@
 from google.appengine.ext import db
 from base import RequestHandler
 from models import Tweet, User
-import decorator, tweepy, yaml
+import decorator, logging, tweepy, yaml
 
 @decorator.decorator
 def add_user_to_request ( f, self, *args, **kwargs ):
@@ -12,7 +12,7 @@ def add_user_to_request ( f, self, *args, **kwargs ):
     '''
 
     self.request.user = User.for_screen_name(
-        self.request.get('screen_name', None)
+        self.request.get('screen_name') or 'hashmarkd'
     )
 
     return f(self, *args, **kwargs)
@@ -21,47 +21,40 @@ def add_user_to_request ( f, self, *args, **kwargs ):
 class IndexPage ( RequestHandler ):
     @add_user_to_request
     def get ( self ):
-        user = self.request.user
+        user = self.view.user = self.request.user
 
-        self.view.user = user
+        self.view.by_me = user.tweets_from.fetch(limit = 5)
 
-        self.view.by_me = Tweet.all_from(
-            user.id if user else None
-        ).fetch(limit = 5)
-
-        self.view.for_me = Tweet.all_to(
-            user.id if user else None
-        ).fetch(limit = 5)
+        self.view.for_me = user.tweets_to.fetch(limit = 5)
 
         self.render_to_response('index.haml')
 
 
 class FetchTask ( RequestHandler ):
-    #@db.run_in_transaction
     def get ( self ):
-        last_tweet = Tweet.all().get()
+        self.response.out.write('Fetching new tweets: ')
 
-        since = last_tweet and last_tweet.created_at
+        for result in tweepy.api.search('#markd', filter = 'links'):
+            try:
+                ## TODO: Refactor into class method of Tweet
+                Tweet.get_or_insert(result.id_str, status_id = result.id_str,
+                    from_user = User.get_or_insert(result.from_user,
+                        id = result.from_user_id_str, screen_name = result.from_user,
+                    ),
+                    to_user = User.for_user_id(result.to_user_id),
+                    created_at = result.created_at, text = result.text
+                )
 
-        self.response.out.write(
-            'Fetching since "%s":' % since.isoformat() if since else 'Initial run:'
-        )
+                self.response.out.write('.')
 
-        for result in tweepy.api.search('#markd', filter = 'links', since = since):
-            ## TODO: Refactor into class method of Tweet
-            t = Tweet.get_or_insert(result.id_str, status_id = result.id_str,
-                from_user = User.for_screen_name(result.from_user),
-                to_user = User.for_user_id(result.to_user_id),
-                created_at = result.created_at, text = result.text
-            )
+            ## In case that "User.for_user_id" call fails, ignore this "result" for now...
+            except tweepy.TweepError, error:
+                logging.warning(error)
 
-            ## Just some sanity checks to let me know you're workin', buddy...
-            self.response.out.write('.' if t else 'X')
-
-        self.response.out.write('Done.')
+                self.response.out.write('X')
 
 
 URLS = [
-    (r'/', IndexPage),
-    (r'/tasks/fetch/', FetchTask),
+    (r'/?', IndexPage),
+    (r'/tasks/fetch/?', FetchTask),
 ]

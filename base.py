@@ -24,7 +24,7 @@ class config ( dict ):
     >>> a['bar'].__class__.__name__
     'config'
 
-    They also allow either subscript or attribute notation to access the contents 
+    They also allow either subscript or attribute notation to access the contents
     as it's a little easier on the eyes:
     >>> a['foo'] == a.foo
     True
