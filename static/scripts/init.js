@@ -36,7 +36,7 @@ window.google && google.load('jquery'); // TODO: Figure out why Google API Loade
          * and no current value. The "title" text will act as the "value" until
          * the user clicks or tabs to it, but that value won't get submitted.
          */
-        $('input[value=][title]').each(function(){
+        $(':text[value][title]').each(function(){
             var $input = $(this);
 
             var title = $input.attr('title');
@@ -46,10 +46,6 @@ window.google && google.load('jquery'); // TODO: Figure out why Google API Loade
             }).blur(function(){
                 if ( !$input.val() ) $input.val(title);
             }).blur(); // Initial trigger...
-
-            $input.closest('form').submit(function(){
-                if ( $input.val() == title ) $input.val('');
-            });
         }); // END each empty input with a title
 
         /**
