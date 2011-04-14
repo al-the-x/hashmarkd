@@ -2,33 +2,42 @@
 %html
     %head
         %title hashmarkd.com | share bookmarks with the Twitterverse
+
         %link(href="http://yui.yahooapis.com/2.8.2r1/build/reset/reset-min.css", rel="stylesheet", type="text/css")
         %link(href="/styles/main.css", rel="stylesheet", type="text/css")
+
         %script(src=urls.at_anywhere, type="text/javascript")
         -#%script(src=urls.google_loader, type="text/javscript")
         %script(src=urls.jquery, type="text/javascript")
         %script(src="/scripts/init.js", type="text/javascript")
+
     %body
         #content
             #header
                 %h1#logo
                     %a(href="http://hashmarkd.com") hashmarkd.com
+
                 %ul#meta-nav
-                    %li#auth
+
             #body
                 .column#column-left
-                    %p Share links with your friends and the rest of the 
+                    %p Share links with your friends and the rest of the
                         Twitterverse just by adding the hashtag
                         %a(href="http://search.twitter.com/search?q=%23markd") \#markd
-                        to your tweets (but following 
+                        to your tweets (but following
                         %span.screen_name @hashmarkd
                         will help, too).
+
                 .column#column-right
                     %form
-                        %h2 
+                        %p.help Your Twitter username goes here&hellip;
+
+                        %h2
                             %label(**{ 'for': "screen_name"}) @
                             %input(name="screen_name", value=view.user, title="Try it out!")
+
                 %br.clear
+
                 %ul.panels
                     ${self.panel('by_me')}
                     ${self.panel('for_me')}
@@ -37,16 +46,19 @@
 <%def name="panel(name)">
     %li.panel(id=name)
         %h3 \#markd ${'by' if name.startswith('by') else 'for'} |
-            %span.screen_name @${view.user or 'twitter'}
-        %ul ${self.marks(view[name])}
+            %span.screen_name @${view.user or 'hashmarkd'}
+        ${self.marks(view[name])}
 </%def>
+
 <%def name="mark(mark)">
-${mark}
+%p.tweet ${mark}
 </%def>
+
 <%def name="marks(marks)">
-- if not marks:
-    %li Nothing #markd yet! |
-        %a(href="http://twitter.com", rel="external") Get to tweeting!
-- for mark in marks:
-    %li ${self.mark(mark)}
+%ul.marks
+    - if not marks:
+        %li.banana Nothing #markd yet! |
+            %a(href="http://twitter.com", rel="external") Get to tweeting!
+    - for mark in marks:
+        %li ${self.mark(mark)}
 </%def>
