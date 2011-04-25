@@ -34,7 +34,17 @@ class FetchTask ( RequestHandler ):
     def get ( self ):
         self.response.out.write('Fetching new tweets: ')
 
-        for result in tweepy.api.search('#markd', filter = 'links'):
+        ## Keep GAE from retrying if rate-limited by Twitter...
+        try: results = tweepy.api.search('#markd', filter = 'links')
+
+        except tweepy.TweepError, error:
+            logging.warning(error)
+
+            self.response.out.write(error)
+
+            return
+
+        for result in results:
             try:
                 ## TODO: Refactor into class method of Tweet
                 Tweet.get_or_insert(result.id_str, status_id = result.id_str,
