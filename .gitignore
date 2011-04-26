@@ -1,3 +1,8 @@
 ## autogen'd by gae
 index.yaml
 
+## gen'd by virtualenv / pip
+.Python
+bin/
+include/
+lib/
