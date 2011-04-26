@@ -13,7 +13,7 @@ def add_user_to_request ( f, self, *args, **kwargs ):
 
     self.request.user = User.for_screen_name(
         self.request.get('screen_name') or 'hashmarkd'
-    )
+    ) or User.for_screen_name('hashmarkd')
 
     return f(self, *args, **kwargs)
 

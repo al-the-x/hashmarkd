@@ -5,24 +5,15 @@ lookup = mako.lookup.TemplateLookup('templates',
     preprocessor = haml.preprocessor
 )
 
-@decorator.decorator
-def memoize ( f, *args, **kwargs ):
-    'Cache the calculated value and return that on subsequent calls.'
-    if not hasattr(f, 'memo'):
-        setattr(f, 'memo', f(*args, **kwargs))
-
-    return getattr(f, 'memo')
-
-
-class config ( dict ):
+class Config ( dict ):
     '''
     Instead of raising a "KeyError" when a key is missing "config" instances pass
     an empty "config" instance, i.e.
-    >>> a = config({ 'foo' : 'bar' })
+    >>> a = Config({ 'foo' : 'bar' })
     >>> a['bar']
     { }
     >>> a['bar'].__class__.__name__
-    'config'
+    'Config'
 
     They also allow either subscript or attribute notation to access the contents
     as it's a little easier on the eyes:
@@ -45,7 +36,7 @@ class config ( dict ):
     { }
     '''
 
-    def __missing__ ( self, name ): return config()
+    def __missing__ ( self, name ): return Config()
 
     def __getattr__ ( self, name ): return self[name]
 
@@ -56,11 +47,11 @@ class config ( dict ):
 
 
     def __getitem__ ( self, name ):
-        item = super(config, self).__getitem__(name)
+        item = super(Config, self).__getitem__(name)
 
         return item if (
-            not isinstance(item, dict) or isinstance(item, config)
-        ) else config(item)
+            not isinstance(item, dict) or isinstance(item, Config)
+        ) else Config(item)
 
 
     @classmethod
@@ -68,16 +59,15 @@ class config ( dict ):
         return cls(yaml.load(open(filename)))
 
 
-twitter = config.from_yaml('config/twitter.yaml')
-
-google = config.from_yaml('config/google.yaml')
-
-
 class RequestHandler ( webapp.RequestHandler ):
-    view = config()
+    view = Config()
 
-    urls = config(
-        at_anywhere = twitter.at_anywhere.url % twitter.at_anywhere.api_key or None,
+    config = Config(
+        twitter = Config.from_yaml('twitter.yaml'),
+    )
+
+    view.urls = Config(
+        at_anywhere = config.twitter.at_anywhere.url % config.twitter.at_anywhere.api_key or None,
         ## FIXME: When we know why "google.load()" isn't working... :/
         #google_loader = google.loader.url % google.loader[hostname].api_key or None,
         jquery = 'http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js',
@@ -86,7 +76,7 @@ class RequestHandler ( webapp.RequestHandler ):
 
     def get_rendered_template ( self, template ):
         return lookup.get_template(template).render(
-            view = self.view, urls = self.urls,
+            view = self.view,
         )
 
 
