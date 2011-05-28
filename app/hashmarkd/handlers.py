@@ -1,10 +1,9 @@
-from google.appengine.ext import db
 from base import RequestHandler
 from models import Tweet, User
-import decorator, logging, tweepy, yaml
+import decorator, logging, tweepy
 
 @decorator.decorator
-def add_user_to_request ( f, self, *args, **kwargs ):
+def add_user_to_request ( f, self, screen_name, *args, **kwargs ):
     '''
     Pull the "screen_name" parameter and display Tweets for that User,
     if we have any. This is all public data anyway, so we're not concerned
@@ -12,20 +11,26 @@ def add_user_to_request ( f, self, *args, **kwargs ):
     '''
 
     self.request.user = User.for_screen_name(
-        self.request.get('screen_name') or 'hashmarkd'
-    ) or User.for_screen_name('hashmarkd')
+        screen_name or self.request.get('screen_name') or 'hashmarkd'
+    )
 
-    return f(self, *args, **kwargs)
+    if not self.request.user:
+        ## self.flash('Not a valid user account...')
+        self.request.user = User.for_screen_name('hashmarkd')
 
+    return f(self, screen_name, *args, **kwargs)
+
+HTML = 'html'
+RSS = 'rss'
 
 class IndexPage ( RequestHandler ):
     @add_user_to_request
-    def get ( self ):
+    def get ( self, screen_name = None, fmt = HTML ):
         user = self.view.user = self.request.user
 
-        self.view.by_me = user.tweets_from.fetch(limit = 5)
+        self.view.by_me = user.tweets_from
 
-        self.view.for_me = user.tweets_to.fetch(limit = 5)
+        self.view.for_me = user.tweets_to
 
         self.render_to_response('index.haml')
 
@@ -65,6 +70,6 @@ class FetchTask ( RequestHandler ):
 
 
 URLS = [
-    (r'/?', IndexPage),
+    (r'/(\w+)?/?', IndexPage),
     (r'/tasks/fetch/?', FetchTask),
 ]

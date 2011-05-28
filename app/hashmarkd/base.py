@@ -1,4 +1,4 @@
-from google.appengine.ext import webapp
+import webapp2 as webapp
 import decorator, haml, mako.lookup, yaml
 
 lookup = mako.lookup.TemplateLookup('templates',
