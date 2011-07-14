@@ -36,6 +36,15 @@ class Config ( dict ):
     { }
     '''
 
+    def __init__ ( self, *args, **kwargs ):
+        super(Config, self).__init__()
+
+        args += ( kwargs, )
+
+        for arg in args:
+            self.update(arg)
+
+
     def __missing__ ( self, name ): return Config()
 
     def __getattr__ ( self, name ): return self[name]
@@ -54,29 +63,44 @@ class Config ( dict ):
         ) else Config(item)
 
 
+    def __add__ ( self, other ):
+        return Config(self, other)
+
+
     @classmethod
     def from_yaml ( cls, filename ):
         return cls(yaml.load(open(filename)))
 
 
 class RequestHandler ( webapp.RequestHandler ):
-    view = Config()
-
     config = Config(
         twitter = Config.from_yaml('twitter.yaml'),
     )
 
-    view.urls = Config(
-        at_anywhere = config.twitter.at_anywhere.url % config.twitter.at_anywhere.api_key or None,
-        ## FIXME: When we know why "google.load()" isn't working... :/
-        #google_loader = google.loader.url % google.loader[hostname].api_key or None,
-        jquery = 'http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js',
+    view = Config(
+        urls = dict(
+            at_anywhere = (
+                config.twitter.at_anywhere.url % config.twitter.at_anywhere.api_key or None
+            ),
+            ## FIXME: When we know why "google.load()" isn't working... :/
+            #google_loader = google.loader.url % google.loader[hostname].api_key or None,
+            jquery = 'http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js',
+        )
     )
+
+
+    def __init__ ( self, *args, **kwargs ):
+        self.view = RequestHandler.view if not self.view else (
+            RequestHandler.view + self.view
+        )
+
+        super(RequestHandler, self).__init__(*args, **kwargs)
+
 
 
     def get_rendered_template ( self, template ):
         return lookup.get_template(template).render(
-            view = self.view,
+            v = self.view
         )
 
 
