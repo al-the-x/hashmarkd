@@ -1,4 +1,4 @@
-!!! Strict
+<!DOCTYPE html>
 %html
     %head
         %title hashmarkd.com | share bookmarks with the Twitterverse
@@ -6,9 +6,9 @@
         %link(href="http://yui.yahooapis.com/2.8.2r1/build/reset/reset-min.css", rel="stylesheet", type="text/css")
         %link(href="/styles/main.css", rel="stylesheet", type="text/css")
 
-        %script(src=view.urls.at_anywhere, type="text/javascript")
+        %script(src=v.urls.at_anywhere, type="text/javascript")
         -#%script(src=urls.google_loader, type="text/javscript")
-        %script(src=view.urls.jquery, type="text/javascript")
+        %script(src=v.urls.jquery, type="text/javascript")
         %script(src="/scripts/init.js", type="text/javascript")
 
     %body
@@ -34,31 +34,10 @@
 
                         %h2
                             %label(**{ 'for': "screen_name"}) @
-                            %input(id="screen_name", name="screen_name", title=view.user, value=view.user)
+                            %input(id="screen_name", name="screen_name", title=v.user, value=v.user)
 
                 %br.clear
 
                 %ul.panels
-                    ${self.panel('by_me')}
-                    ${self.panel('for_me')}
+                    <%include file="tweets.haml" />
                     %li.clear
-
-<%def name="panel(name)">
-    %li.panel(id=name)
-        %h3 \#markd ${'by' if name.startswith('by') else 'for'} |
-            %span.screen_name @${view.user or 'hashmarkd'}
-        ${self.marks(view[name])}
-</%def>
-
-<%def name="mark(mark)">
-%p.tweet ${mark}
-</%def>
-
-<%def name="marks(marks)">
-%ul.marks
-    - if not marks:
-        %li.banana Nothing #markd yet! |
-            %a(href="http://twitter.com", rel="external") Get to tweeting!
-    - for mark in marks:
-        %li ${self.mark(mark)}
-</%def>

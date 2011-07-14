@@ -1,3 +1,4 @@
+import webapp2 as webapp
 from base import RequestHandler
 from models import Tweet, User
 import decorator, logging, tweepy
@@ -20,19 +21,54 @@ def add_user_to_request ( f, self, screen_name, *args, **kwargs ):
 
     return f(self, screen_name, *args, **kwargs)
 
-HTML = 'html'
-RSS = 'rss'
+
+@decorator.decorator
+def add_pagination ( f, self, screen_name, page, count, *args, **kwargs ):
+    page = page or 1; count = count or 10
+
+    return f(self, screen_name, page, count, *args, **kwargs)
+
 
 class IndexPage ( RequestHandler ):
     @add_user_to_request
-    def get ( self, screen_name = None, fmt = HTML ):
+    def get ( self, screen_name = None ):
         user = self.view.user = self.request.user
 
-        self.view.by_me = user.tweets_from
+        self.view.by_me = user.tweets_from.fetch(limit = 10)
 
-        self.view.for_me = user.tweets_to
+        self.view.for_me = user.tweets_to.fetch(limit = 10)
 
         self.render_to_response('index.haml')
+
+
+class TweetsPage ( RequestHandler ):
+    def tweets ( self, user ): pass
+
+
+    @add_user_to_request
+    @add_pagination
+    def get ( self, screen_name, page, count ):
+        self.view.user = self.request.user
+
+        self.view.tweets = self.tweets(self.request.user).fetch(
+            limit = count, offset = count * (page - 1)
+        )
+
+        self.render_to_response('tweets.haml')
+
+
+class MarkedByPage ( TweetsPage ):
+    view = dict(name = 'by_me')
+
+    def tweets ( self, user ):
+        return user.tweets_from
+
+
+class MarkedForPage ( RequestHandler ):
+    name = 'for_me'
+
+    def tweets ( self, user ):
+        return user.tweets_to
 
 
 class FetchTask ( RequestHandler ):
@@ -71,5 +107,7 @@ class FetchTask ( RequestHandler ):
 
 URLS = [
     (r'/(\w+)?/?', IndexPage),
+    (r'/markd_by/(\w+)/(?:page/(\d+)/)?(?:count/(\d+)/)?', MarkedByPage),
+    (r'/markd_for/(\w+)/(?:page/(\d+)/)?(?:count/(\d+)/)?', MarkedForPage),
     (r'/tasks/fetch/?', FetchTask),
 ]
