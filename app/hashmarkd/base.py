@@ -5,7 +5,7 @@ lookup = mako.lookup.TemplateLookup('templates',
     preprocessor = haml.preprocessor
 )
 
-class Config ( dict ):
+class Config(dict):
     '''
     Instead of raising a "KeyError" when a key is missing "config" instances pass
     an empty "config" instance, i.e.
@@ -32,30 +32,34 @@ class Config ( dict ):
     'baz'
     >>> a.foo.baz
     { }
+    >>> a.foo.baz
+    { }
     >>> a.foo.baz.bat
     { }
     '''
 
-    def __init__ ( self, *args, **kwargs ):
+    def __init__(self, *args, **kwargs):
         super(Config, self).__init__()
 
-        args += ( kwargs, )
+        args +=(kwargs, )
 
         for arg in args:
             self.update(arg)
 
 
-    def __missing__ ( self, name ): return Config()
+    def __missing__(self, name):
+        return Config()
 
-    def __getattr__ ( self, name ): return self[name]
+    def __getattr__(self, name):
+        return self[name]
 
-    def __setattr__ ( self, name, value ):
+    def __setattr__(self, name, value):
         self[name] = value
 
         return value
 
 
-    def __getitem__ ( self, name ):
+    def __getitem__(self, name):
         item = super(Config, self).__getitem__(name)
 
         return item if (
@@ -63,16 +67,19 @@ class Config ( dict ):
         ) else Config(item)
 
 
-    def __add__ ( self, other ):
+    def __add__(self, other):
         return Config(self, other)
+
+    def __call__(self, *args, **kwargs):
+        return None
 
 
     @classmethod
-    def from_yaml ( cls, filename ):
+    def from_yaml(cls, filename):
         return cls(yaml.load(open(filename)))
 
 
-class RequestHandler ( webapp.RequestHandler ):
+class RequestHandler(webapp.RequestHandler):
     config = Config(
         twitter = Config.from_yaml('twitter.yaml'),
     )
@@ -89,7 +96,7 @@ class RequestHandler ( webapp.RequestHandler ):
     )
 
 
-    def __init__ ( self, *args, **kwargs ):
+    def __init__(self, *args, **kwargs):
         self.view = RequestHandler.view if not self.view else (
             RequestHandler.view + self.view
         )
@@ -98,13 +105,13 @@ class RequestHandler ( webapp.RequestHandler ):
 
 
 
-    def get_rendered_template ( self, template ):
+    def get_rendered_template(self, template):
         return lookup.get_template(template).render(
             v = self.view
         )
 
 
-    def render_to_response ( self, template ):
+    def render_to_response(self, template):
         self.response.out.write(self.get_rendered_template(template))
 
         return self
