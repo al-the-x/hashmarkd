@@ -13,11 +13,7 @@ def add_user_to_request(f, self, screen_name, *args, **kwargs):
 
     self.request.user=User.for_screen_name(
         screen_name or self.request.get('screen_name') or 'hashmarkd'
-    )
-
-    if not self.request.user:
-        ## self.flash('Not a valid user account...')
-        self.request.user=User.for_screen_name('hashmarkd')
+    ) or User.for_screen_name('hashmarkd')
 
     return f(self, screen_name, *args, **kwargs)
 
@@ -101,7 +97,7 @@ class FetchTask(RequestHandler):
 
 
 URLS=[
-    (r'/(\w+)?/?', IndexPage),
+    (r'/', IndexPage),
     (r'/markd_by/(\w+)/(?:page/(\d+)/)?(?:count/(\d+)/)?', MarkedByPage),
     (r'/markd_for/(\w+)/(?:page/(\d+)/)?(?:count/(\d+)/)?', MarkedForPage),
     (r'/tasks/fetch/?', FetchTask),
