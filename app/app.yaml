@@ -4,19 +4,19 @@ runtime: python
 api_version: 1
 
 handlers:
--   url: /styles
-    static_dir: static/styles/
+- url: /styles
+  static_dir: static/styles/
 
--   url: /scripts
-    static_dir: static/scripts/
+- url: /scripts
+  static_dir: static/scripts/
 
--   url: /images
-    static_dir: static/images/
+- url: /images
+  static_dir: static/images/
 
--   url: /tasks/.*
-    script: app.py
-    login: admin
+- url: /tasks/.*
+  script: app.py
+  login: admin
 
--   url: /.*
-    script: app.py
+- url: /.*
+  script: app.py
 
