@@ -1,4 +1,6 @@
-at_anywhere:
-    url: "http://platform.twitter.com/anywhere.js?id=%s&v=1"
-    api_key: 'UfnjEKFi3nZqHOP9FArtA'
+widgets: "http://platform.twitter.com/widgets.js"
+reply: "https://twitter.com/intent/tweet?in_reply_to=%s"
+retweet: "https://twitter.com/intent/retweet?tweet_id=%s"
+favorite: "https://twitter.com/intent/favorite?tweet_id=%s"
+user: "https://twitter.com/intent/user?screen_name=%s"
 

@@ -1,7 +1,7 @@
 %%def(name="render_tweet(tweet)")
     %blockquote.tweet ${tweet}
 
-    %p ${tweet.created_at}
+    %small ${tweet.created_at}
 
 %%def(name="render_tweets(tweets)")
     %ul.marks
@@ -13,12 +13,14 @@
 
 %li.panel(id="by_me")
     %h3 \#markd by
-        %span.screen_name @${v.screen_name}
+        %a(href=v.urls.twitter.user % v.screen_name)
+            @${v.screen_name}
 
     ${render_tweets(v.by_me)}
 
 %li.panel(id="for_me")
     %h3 \#markd for
-        %span.screen_name @${v.screen_name}
+        %a(href=v.urls.twitter.user % v.screen_name)
+            @${v.screen_name}
 
     ${render_tweets(v.for_me)}

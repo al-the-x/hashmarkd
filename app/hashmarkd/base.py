@@ -86,9 +86,7 @@ class RequestHandler(webapp.RequestHandler):
 
     view = Config(
         urls = dict(
-            at_anywhere = (
-                config.twitter.at_anywhere.url % config.twitter.at_anywhere.api_key or None
-            ),
+            twitter = config.twitter,
             ## FIXME: When we know why "google.load()" isn't working... :/
             #google_loader = google.loader.url % google.loader[hostname].api_key or None,
             jquery = 'http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js',
