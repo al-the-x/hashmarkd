@@ -4,18 +4,20 @@ from models import Tweet, User
 import decorator, logging, tweepy
 
 @decorator.decorator
-def add_user_to_request(f, self, screen_name, *args, **kwargs):
+def add_user_to_request(f, self, *args, **kwargs):
     '''
     Pull the "screen_name" parameter and display Tweets for that User,
     if we have any. This is all public data anyway, so we're not concerned
     about authentication yet.
     '''
 
-    self.request.user=User.for_screen_name(
-        screen_name or self.request.get('screen_name') or 'hashmarkd'
-    ) or User.for_screen_name('hashmarkd')
+    screen_name = self.view.screen_name = self.request.get('screen_name') or 'hashmarkd'
+    ## If no screen_name given, use "hashmarkd"
 
-    return f(self, screen_name, *args, **kwargs)
+    self.request.user = User.for_screen_name(screen_name) or User.get_or_insert(
+        screen_name, screen_name=screen_name)
+
+    return f(self, *args, **kwargs)
 
 
 @decorator.decorator
@@ -27,19 +29,19 @@ def add_pagination(f, self, screen_name, page, count, *args, **kwargs):
 
 class IndexPage(RequestHandler):
     @add_user_to_request
-    def get(self, screen_name=None):
-        user=self.view.user=self.request.user
+    def get(self):
+        user = self.view.user = self.request.user
 
-        self.view.by_me=user.tweets_from.fetch(limit=10)
+        self.view.by_me = user.tweets_from.fetch(limit=10)
 
-        self.view.for_me=user.tweets_to.fetch(limit=10)
+        self.view.for_me = user.tweets_to.fetch(limit=10)
 
         self.render_to_response('index.haml')
 
 
 class TweetsPage(RequestHandler):
-    def tweets(self, user): pass
-
+    def tweets(self, user):
+        pass
 
     @add_user_to_request
     @add_pagination
