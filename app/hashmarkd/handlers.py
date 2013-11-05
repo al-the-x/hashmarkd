@@ -32,9 +32,9 @@ class IndexPage(RequestHandler):
     def get(self):
         user = self.view.user = self.request.user
 
-        self.view.by_me = user.tweets_from.fetch(limit=10)
+        self.view.by_me = user.tweets_from.order('-created_at')
 
-        self.view.for_me = user.tweets_to.fetch(limit=10)
+        self.view.for_me = user.tweets_to.order('-created_at')
 
         self.render_to_response('index.haml')
 
