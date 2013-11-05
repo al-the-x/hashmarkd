@@ -1,17 +1,22 @@
-<%def name="render_tweet ( tweet )">
-%blockquote.tweet ${tweet}
+%%def(name="render_tweet(tweet)")
+    %blockquote.tweet ${tweet}
 
-%p ${tweet.created_at}
-</%def>
+    %p ${tweet.created_at}
 
-%li.panel(id=v.name)
-    %h3 \#markd ${'by' if v.name.startswith('by') else 'for'} |
-        %span.screen_name @${v.user or 'hashmarkd'}
-
+%%def(name="render_tweets(tweets)")
     %ul.marks
-        - if not v.tweets:
+        - if not tweets:
             %li.banana Nothing #markd yet! |
                 %a(href="http://twitter.com", rel="external") Get to tweeting!
-        - for tweet in v.tweets:
+        - for tweet in tweets:
             %li ${self.render_tweet(tweet)}
 
+%li.panel(id="by_me")
+    %h3 \#markd by
+        %span.screen_name @${v.screen_name}
+
+    ${render_tweets(v.by_me)}
+
+%li.panel(id="for_me")
+    %h3 \#markd for
+        %span.screen_name @${v.screen_name}
