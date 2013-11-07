@@ -73,10 +73,10 @@ class FetchTask(RequestHandler):
     def get(self):
         self.response.out.write('Fetching new tweets: ')
 
-        ## Keep GAE from retrying if rate-limited by Twitter...
         try:
             results=tweepy.api.search('#markd', filter='links')
 
+        ## Keep GAE from retrying if rate-limited by Twitter...
         except tweepy.TweepError as error:
             logging.warning(error)
 
@@ -86,7 +86,6 @@ class FetchTask(RequestHandler):
 
         for result in results:
             try:
-                ## TODO: Refactor into class method of Tweet
                 Tweet.from_tweet(result)
 
                 self.response.out.write('.')
