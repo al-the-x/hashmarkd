@@ -81,12 +81,15 @@ class Config(dict):
 
 class RequestHandler(webapp.RequestHandler):
     config = Config(
-        twitter = Config.from_yaml('twitter.yaml'),
+        twitter={
+            'urls': Config.from_yaml('twitter.yaml'),
+            'oauth': Config.from_yaml('oauth.yaml'),
+        }
     )
 
     view = Config(
         urls = dict(
-            twitter = config.twitter,
+            twitter = config.twitter.urls,
             ## FIXME: When we know why "google.load()" isn't working... :/
             #google_loader = google.loader.url % google.loader[hostname].api_key or None,
             jquery = 'http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js',

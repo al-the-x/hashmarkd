@@ -1,6 +1,9 @@
 ## autogen'd by gae
 index.yaml
 
+## oauth credentials
+oauth.yaml
+
 ## gen'd by virtualenv / pip
 .Python
 bin/
