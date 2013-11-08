@@ -1,6 +1,6 @@
-import webapp2 as webapp
 from base import RequestHandler
 from models import Tweet, User
+from util import UploadHandler
 import decorator, logging, tweepy
 
 @decorator.decorator
@@ -70,11 +70,26 @@ class MarkedForPage(RequestHandler):
 
 
 class FetchTask(RequestHandler):
+    _twitter = None
+
+    @property
+    def twitter(self):
+        if not self._twitter:
+            self._twitter = tweepy.API(tweepy.OAuthHandler(
+                self.config.twitter.oauth.consumer.key,
+                self.config.twitter.oauth.consumer.secret,
+            ))
+
+        return self._twitter
+
     def get(self):
         self.response.out.write('Fetching new tweets: ')
 
+        last_tweet = Tweet.all().order('-created_at').fetch(1)[0]
+
         try:
-            results=tweepy.api.search('#markd', filter='links')
+            results=self.twitter.search('#markd', filter='links',
+                since_id=last_tweet.status_id if last_tweet else None)
 
         ## Keep GAE from retrying if rate-limited by Twitter...
         except tweepy.TweepError as error:
@@ -102,4 +117,5 @@ URLS=[
     (r'/markd_by/(\w+)/(?:page/(\d+)/)?(?:count/(\d+)/)?', MarkedByPage),
     (r'/markd_for/(\w+)/(?:page/(\d+)/)?(?:count/(\d+)/)?', MarkedForPage),
     (r'/tasks/fetch/?', FetchTask),
+    (r'/tasks/load', UploadHandler),
 ]

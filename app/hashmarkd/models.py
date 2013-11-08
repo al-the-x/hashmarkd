@@ -67,10 +67,10 @@ class Tweet(db.Model):
     @classmethod
     def from_tweet(cls, tweet):
         return cls.get_or_insert(tweet.id_str, status_id=tweet.id_str,
-            from_user=User.get_or_insert(tweet.from_user,
-                id=tweet.from_user_id_str, screen_name=tweet.from_user,
+            from_user=User.get_or_insert(tweet.author.screen_name,
+                id=tweet.author.id_str, screen_name=tweet.author.screen_name,
             ),
-            to_user=User.for_user_id(tweet.to_user_id),
+            #to_user=User.for_user_id(tweet.to_user_id),
             created_at=tweet.created_at, text=tweet.text
         )
 
